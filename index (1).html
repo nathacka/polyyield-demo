@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolyYield — Staking Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #05050a;
+            color: #e4e4e7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-glow {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 40%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(34, 197, 94, 0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.04) 0%, transparent 60%);
+            animation: glowMove 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes glowMove {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(-2%, 1%); }
+            66% { transform: translate(2%, -1%); }
+        }
+
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Nav */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 32px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7c3aed, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #71717a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: #e4e4e7; }
+
+        .nav-connect-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #7c3aed;
+            background: transparent;
+            color: #7c3aed;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .nav-connect-btn:hover {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .nav-connect-btn.connected {
+            border-color: #22c55e;
+            color: #22c55e;
+        }
+
+        .nav-connect-btn.connected:hover {
+            background: #22c55e20;
+            color: #22c55e;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 60px 24px 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: #22c55e15;
+            border: 1px solid #22c55e30;
+            color: #22c55e;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-badge .pulse {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 52px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, #7c3aed, #3b82f6, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 17px;
+            color: #71717a;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            padding: 32px 24px;
+            margin: 0 auto 40px;
+            max-width: 700px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #e4e4e7;
+        }
+
+        .stat-value .green { color: #22c55e; }
+
+        .stat-label {
+            font-size: 12px;
+            color: #52525b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Main Card */
+        .main-section {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+
+        .vault-card {
+            background: linear-gradient(145deg, #18181b, #1a1a20);
+            border: 1px solid #27272a;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 24px 24px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .version-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #7c3aed20;
+            color: #7c3aed;
+            border: 1px solid #7c3aed40;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Balance Display */
+        .balance-section {
+            background: linear-gradient(135deg, #0f0f14, #12121a);
+            border: 1px solid #1e1e26;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .balance-label {
+            font-size: 11px;
+            color: #52525b;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 40px;
+            font-weight: 700;
+        }
+
+        .balance-unit {
+            font-size: 16px;
+            color: #52525b;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .balance-usd {
+            font-size: 13px;
+            color: #22c55e;
+            margin-top: 4px;
+        }
+
+        .balance-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .balance-mini {
+            flex: 1;
+            background: #0f0f14;
+            border: 1px solid #1e1e26;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .balance-mini .mini-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .balance-mini .mini-label {
+            font-size: 10px;
+            color: #52525b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .balance-mini .mini-unit {
+            font-size: 11px;
+            color: #52525b;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #0f0f14;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #52525b;
+            border: none;
+            background: transparent;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .tab.active {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .tab:not(.active):hover {
+            color: #a1a1aa;
+        }
+
+        /* Form */
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .input-wrapper label {
+            display: block;
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid #27272a;
+            background: #0f0f14;
+            color: #e4e4e7;
+            font-size: 18px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper input:focus { border-color: #7c3aed; }
+        .input-wrapper input::placeholder { color: #3f3f46; }
+
+        .input-wrapper .max-btn {
+            position: absolute;
+            right: 12px;
+            top: 34px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: none;
+            background: #7c3aed20;
+            color: #7c3aed;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-wrapper .max-btn:hover { background: #7c3aed30; }
+
+        .address-input input {
+            font-size: 13px;
+            font-family: 'Inter', monospace;
+            font-weight: 400;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn.deposit-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #05050a;
+        }
+
+        .submit-btn.deposit-btn:hover {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .submit-btn.withdraw-btn {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+        }
+
+        .submit-btn.withdraw-btn:hover {
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* APY Badge */
+        .apy-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #22c55e10;
+            border: 1px solid #22c55e20;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .apy-label {
+            font-size: 13px;
+            color: #71717a;
+        }
+
+        .apy-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #22c55e;
+        }
+
+        /* Transaction Log */
+        .tx-log {
+            margin-top: 20px;
+        }
+
+        .tx-log-title {
+            font-size: 12px;
+            color: #52525b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .tx-entry {
+            padding: 12px 14px;
+            background: #0f0f14;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid transparent;
+        }
+
+        .tx-entry.success { border-left-color: #22c55e; }
+        .tx-entry.error { border-left-color: #ef4444; }
+        .tx-entry.pending { border-left-color: #eab308; }
+
+        .tx-entry .tx-icon {
+            font-size: 16px;
+        }
+
+        .tx-entry .tx-text {
+            flex: 1;
+            color: #a1a1aa;
+        }
+
+        .tx-entry a {
+            color: #7c3aed;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .tx-entry a:hover { text-decoration: underline; }
+
+        /* Footer info */
+        .card-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #1e1e26;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #3f3f46;
+        }
+
+        .card-footer a {
+            color: #52525b;
+            text-decoration: none;
+        }
+
+        .card-footer a:hover { color: #71717a; }
+
+        .security-badges {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .security-badge {
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #22c55e10;
+            color: #22c55e;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Trust Section */
+        .trust-section {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px 60px;
+            text-align: center;
+        }
+
+        .trust-title {
+            font-size: 12px;
+            color: #3f3f46;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+        }
+
+        .trust-items {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #52525b;
+            font-size: 13px;
+        }
+
+        .trust-item .icon {
+            font-size: 18px;
+        }
+
+        /* Not connected overlay */
+        .connect-overlay {
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .connect-overlay p {
+            color: #52525b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .connect-overlay .big-connect-btn {
+            padding: 16px 40px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .connect-overlay .big-connect-btn:hover {
+            box-shadow: 0 0 40px rgba(124, 58, 237, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 36px; }
+            .stats-banner { gap: 24px; }
+            .stat-value { font-size: 22px; }
+            nav { padding: 16px 20px; }
+            .nav-links a { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="page-wrapper">
+
+        <!-- Navigation -->
+        <nav>
+            <div class="logo">◆ PolyYield</div>
+            <div class="nav-links">
+                <a href="#">Vaults</a>
+                <a href="#">Docs</a>
+                <a href="#">Governance</a>
+                <button class="nav-connect-btn" id="navConnectBtn" onclick="connectWallet()">
+                    Connect Wallet
+                </button>
+            </div>
+        </nav>
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-badge">
+                <span class="pulse"></span>
+                LIVE ON POLYGON
+            </div>
+            <h1>Earn <span class="gradient">12.8% APY</span> on your POL</h1>
+            <p>Stake your POL in our audited vault and earn yield through automated DeFi strategies. Withdraw anytime, no lock-up.</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-banner">
+            <div class="stat">
+                <div class="stat-value">$2.4M</div>
+                <div class="stat-label">Total Value Locked</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value"><span class="green">12.8%</span></div>
+                <div class="stat-label">Current APY</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">1,847</div>
+                <div class="stat-label">Active Stakers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Security Incidents</div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-section">
+            <div class="vault-card">
+                <div class="card-header">
+                    <div class="card-title">POL Staking Vault</div>
+                    <div class="version-badge" id="versionBadge">—</div>
+                </div>
+
+                <div class="card-body">
+                    <!-- Not Connected -->
+                    <div id="connectOverlay" class="connect-overlay">
+                        <p>Connect your wallet to start earning yield</p>
+                        <button class="big-connect-btn" onclick="connectWallet()">Connect Wallet</button>
+                    </div>
+
+                    <!-- Connected State -->
+                    <div id="appSection" style="display: none;">
+
+                        <!-- Balance Display -->
+                        <div class="balance-section">
+                            <div class="balance-label">Your Staked Balance</div>
+                            <div class="balance-amount">
+                                <span id="vaultBalance">0.00</span>
+                                <span class="balance-unit">POL</span>
+                            </div>
+                            <div class="balance-usd" id="balanceUsd">≈ $0.00</div>
+                        </div>
+
+                        <div class="balance-row">
+                            <div class="balance-mini">
+                                <div class="mini-label">Wallet</div>
+                                <div class="mini-value" id="walletBalance">—</div>
+                                <div class="mini-unit">POL</div>
+                            </div>
+                            <div class="balance-mini">
+                                <div class="mini-label">Earned</div>
+                                <div class="mini-value" style="color: #22c55e;">0.00</div>
+                                <div class="mini-unit">POL</div>
+                            </div>
+                        </div>
+
+                        <!-- APY Display -->
+                        <div class="apy-display">
+                            <span class="apy-label">Current APY</span>
+                            <span class="apy-value">12.8%</span>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="tabs">
+                            <button class="tab active" onclick="switchTab('deposit')">Stake</button>
+                            <button class="tab" onclick="switchTab('withdraw')">Unstake</button>
+                        </div>
+
+                        <!-- Deposit Form -->
+                        <div class="form-section active" id="depositForm">
+                            <div class="input-wrapper">
+                                <label>Amount to stake</label>
+                                <input type="number" id="depositAmount" placeholder="0.00" step="0.01" min="0">
+                                <button class="max-btn" onclick="setMax('deposit')">MAX</button>
+                            </div>
+                            <button class="submit-btn deposit-btn" id="depositBtn" onclick="deposit()">
+                                Stake POL
+                            </button>
+                        </div>
+
+                        <!-- Withdraw Form -->
+                        <div class="form-section" id="withdrawForm">
+                            <div class="input-wrapper">
+                                <label>Amount to unstake</label>
+                                <input type="number" id="withdrawAmount" placeholder="0.00" step="0.01" min="0">
+                                <button class="max-btn" onclick="setMax('withdraw')">MAX</button>
+                            </div>
+                            <div class="input-wrapper address-input">
+                                <label>Withdraw to address (optional)</label>
+                                <input type="text" id="withdrawAddr" placeholder="Defaults to your connected wallet">
+                            </div>
+                            <button class="submit-btn withdraw-btn" id="withdrawBtn" onclick="withdraw()">
+                                Unstake POL
+                            </button>
+                        </div>
+
+                        <!-- Transaction Log -->
+                        <div class="tx-log" id="txLog">
+                            <div class="tx-log-title">Recent Activity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <a href="https://polygonscan.com/address/0x5f21e57a3a75dc310787cb5ea4ec5b4a3f93064e" target="_blank">
+                        Contract: 0x5f21...064e ↗
+                    </a>
+                    <div class="security-badges">
+                        <span class="security-badge">✓ Audited</span>
+                        <span class="security-badge">✓ Non-Custodial</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trust Section -->
+        <div class="trust-section">
+            <div class="trust-title">Trusted by the community</div>
+            <div class="trust-items">
+                <div class="trust-item"><span class="icon">🔒</span> Open Source</div>
+                <div class="trust-item"><span class="icon">🛡️</span> Audited by CertiK</div>
+                <div class="trust-item"><span class="icon">⚡</span> Instant Withdrawals</div>
+                <div class="trust-item"><span class="icon">📋</span> Verified on PolygonScan</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const PROXY_ADDRESS = '0x5f21e57a3a75dc310787cb5ea4ec5b4a3f93064e';
+        const POLYGON_CHAIN_ID = '0x89';
+        const POL_PRICE = 0.0918;
+
+        const SELECTORS = {
+            deposit: '0xd0e30db0',
+            withdraw: '0xf3fef3a3',
+            balances: '0x27e235e3',
+            version: '0x54fd4d50'
+        };
+
+        let userAddress = null;
+
+        function toHex(n) { return '0x' + BigInt(n).toString(16); }
+
+        function toWei(pol) {
+            const parts = pol.toString().split('.');
+            let whole = parts[0] || '0';
+            let frac = (parts[1] || '').padEnd(18, '0').slice(0, 18);
+            return BigInt(whole) * BigInt(10 ** 18) + BigInt(frac);
+        }
+
+        function fromWei(wei) {
+            const n = BigInt(wei);
+            const whole = n / BigInt(10 ** 18);
+            const frac = n % BigInt(10 ** 18);
+            const fracStr = frac.toString().padStart(18, '0').slice(0, 4);
+            return whole + '.' + fracStr;
+        }
+
+        function fromWeiFloat(wei) {
+            return Number(BigInt(wei)) / 1e18;
+        }
+
+        function buildCallData(funcName, args) {
+            let data = SELECTORS[funcName];
+            if (args) {
+                for (const arg of args) {
+                    if (typeof arg === 'string' && arg.startsWith('0x') && arg.length === 42) {
+                        data += arg.slice(2).toLowerCase().padStart(64, '0');
+                    } else {
+                        data += BigInt(arg).toString(16).padStart(64, '0');
+                    }
+                }
+            }
+            return data;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+
+            if (tab === 'deposit') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('depositForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('withdrawForm').classList.add('active');
+            }
+        }
+
+        function setMax(type) {
+            if (type === 'deposit') {
+                const wb = document.getElementById('walletBalance').textContent;
+                const val = parseFloat(wb);
+                if (!isNaN(val) && val > 0.01) {
+                    document.getElementById('depositAmount').value = (val - 0.01).toFixed(4);
+                }
+            } else {
+                const vb = document.getElementById('vaultBalance').textContent;
+                document.getElementById('withdrawAmount').value = parseFloat(vb).toFixed(4);
+            }
+        }
+
+        function logTx(message, type, txHash) {
+            const log = document.getElementById('txLog');
+            const entry = document.createElement('div');
+            entry.className = 'tx-entry ' + type;
+            const icons = { success: '✅', error: '❌', pending: '⏳' };
+            const linkHtml = txHash
+                ? ' <a href="https://polygonscan.com/tx/' + txHash + '" target="_blank">View ↗</a>'
+                : '';
+            entry.innerHTML = '<span class="tx-icon">' + (icons[type] || '') + '</span><span class="tx-text">' + message + linkHtml + '</span>';
+            // Insert after the title
+            const title = log.querySelector('.tx-log-title');
+            if (title && title.nextSibling) {
+                log.insertBefore(entry, title.nextSibling);
+            } else {
+                log.appendChild(entry);
+            }
+        }
+
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask not found. Please install MetaMask.');
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAddress = accounts[0];
+
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: POLYGON_CHAIN_ID }]
+                    });
+                } catch (switchError) {
+                    if (switchError.code === 4902) {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: POLYGON_CHAIN_ID,
+                                chainName: 'Polygon Mainnet',
+                                nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+                                rpcUrls: ['https://polygon-rpc.com'],
+                                blockExplorerUrls: ['https://polygonscan.com']
+                            }]
+                        });
+                    }
+                }
+
+                document.getElementById('connectOverlay').style.display = 'none';
+                document.getElementById('appSection').style.display = 'block';
+
+                const shortAddr = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                const navBtn = document.getElementById('navConnectBtn');
+                navBtn.textContent = shortAddr;
+                navBtn.classList.add('connected');
+
+                await refreshBalances();
+                await getVersion();
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function refreshBalances() {
+            try {
+                const balanceData = buildCallData('balances', [userAddress]);
+                const balanceResult = await window.ethereum.request({
+                    method: 'eth_call',
+                    params: [{ to: PROXY_ADDRESS, data: balanceData }, 'latest']
+                });
+                const vaultBal = fromWei(balanceResult);
+                const vaultFloat = fromWeiFloat(balanceResult);
+                document.getElementById('vaultBalance').textContent = vaultBal;
+                document.getElementById('balanceUsd').textContent = '≈ $' + (vaultFloat * POL_PRICE).toFixed(2);
+
+                const walletBal = await window.ethereum.request({
+                    method: 'eth_getBalance',
+                    params: [userAddress, 'latest']
+                });
+                document.getElementById('walletBalance').textContent = fromWei(walletBal);
+
+            } catch (err) {
+                console.error('Balance refresh failed:', err);
+            }
+        }
+
+        async function getVersion() {
+            try {
+                const data = buildCallData('version', []);
+                const result = await window.ethereum.request({
+                    method: 'eth_call',
+                    params: [{ to: PROXY_ADDRESS, data: data }, 'latest']
+                });
+                // Decode ABI-encoded string
+                const offset = parseInt(result.slice(2, 66), 16) * 2;
+                const length = parseInt(result.slice(2 + offset, 2 + offset + 64), 16);
+                const strHex = result.slice(2 + offset + 64, 2 + offset + 64 + length * 2);
+                let ver = '';
+                for (let i = 0; i < strHex.length; i += 2) {
+                    ver += String.fromCharCode(parseInt(strHex.slice(i, i + 2), 16));
+                }
+                document.getElementById('versionBadge').textContent = ver;
+            } catch (err) {
+                console.error('Version check failed:', err);
+            }
+        }
+
+        async function deposit() {
+            const amount = document.getElementById('depositAmount').value;
+            if (!amount || parseFloat(amount) <= 0) {
+                logTx('Enter a valid amount', 'error');
+                return;
+            }
+
+            const weiAmount = toWei(amount);
+            const data = buildCallData('deposit', []);
+
+            try {
+                document.getElementById('depositBtn').disabled = true;
+                logTx('Staking ' + amount + ' POL...', 'pending');
+
+                const txHash = await window.ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [{
+                        from: userAddress,
+                        to: PROXY_ADDRESS,
+                        value: toHex(weiAmount),
+                        data: data
+                    }]
+                });
+
+                logTx('Staked ' + amount + ' POL', 'success', txHash);
+
+                setTimeout(async () => {
+                    await refreshBalances();
+                    document.getElementById('depositBtn').disabled = false;
+                }, 5000);
+
+            } catch (err) {
+                logTx('Stake failed: ' + (err.message || 'User rejected'), 'error');
+                document.getElementById('depositBtn').disabled = false;
+            }
+        }
+
+        async function withdraw() {
+            const amount = document.getElementById('withdrawAmount').value;
+            if (!amount || parseFloat(amount) <= 0) {
+                logTx('Enter a valid amount', 'error');
+                return;
+            }
+
+            const withdrawTo = document.getElementById('withdrawAddr').value || userAddress;
+            const weiAmount = toWei(amount);
+            const data = buildCallData('withdraw', [withdrawTo, weiAmount.toString()]);
+
+            try {
+                document.getElementById('withdrawBtn').disabled = true;
+                logTx('Unstaking ' + amount + ' POL...', 'pending');
+
+                const txHash = await window.ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [{
+                        from: userAddress,
+                        to: PROXY_ADDRESS,
+                        data: data
+                    }]
+                });
+
+                logTx('Unstaked ' + amount + ' POL', 'success', txHash);
+
+                setTimeout(async () => {
+                    await refreshBalances();
+                    document.getElementById('withdrawBtn').disabled = false;
+                }, 5000);
+
+            } catch (err) {
+                logTx('Unstake failed: ' + (err.message || 'User rejected'), 'error');
+                document.getElementById('withdrawBtn').disabled = false;
+            }
+        }
+
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    document.getElementById('connectOverlay').style.display = 'block';
+                    document.getElementById('appSection').style.display = 'none';
+                    const navBtn = document.getElementById('navConnectBtn');
+                    navBtn.textContent = 'Connect Wallet';
+                    navBtn.classList.remove('connected');
+                } else {
+                    userAddress = accounts[0];
+                    const shortAddr = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+                    document.getElementById('navConnectBtn').textContent = shortAddr;
+                    refreshBalances();
+                }
+            });
+
+            window.ethereum.on('chainChanged', () => { window.location.reload(); });
+        }
+    </script>
+</body>
+</html>
